@@ -48,4 +48,4 @@ Whether you're using the Python script or the executable, the interface will loo
 
 ---
 
-That's it! 🎉 You're ready to enjoy your customized voice lines!  
+That's it! 🎉 You're ready.

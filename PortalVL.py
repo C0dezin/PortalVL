@@ -134,7 +134,7 @@ def main():
     print("3. French")
     print("4. Russian")
     print("5. Spanish")
-    print("6. Minimal Voice Lines Preset")
+    print("6. ShutUpGLaDOS (Minimal Voice Line Preset by XnonXte)")
     print("7. Exit")
 
     try:
@@ -169,7 +169,7 @@ def main():
 
         replace_sound_files_in_source_unpack(source_unpack_path, os.path.join(extracted_folder, language, "sound"))
 
-        apply_preset = input("Do you want to apply the Minimal Voice Lines preset? (y/n): ").strip().lower()
+        apply_preset = input("Do you want to apply ShutUpGLaDOS (Minimal Voice Line Preset by XnonXte)? (y/n): ").strip().lower()
         skip = False
 
         if language == "russian" and apply_preset == 'y':

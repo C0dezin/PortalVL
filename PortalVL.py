@@ -171,7 +171,7 @@ def main():
         apply_preset = input("Do you want to apply the Minimal Voice Lines preset? (y/n): ").strip().lower()
         skip = False
 
-        if language == "russian" and apply_preset == 'y':
+        if language == "russian" or language == "spanish" and apply_preset == 'y':
             proceed = input("WARNING: WILL BREAK, DO YOU WANT TO PROCEED? (y/n): ").strip().lower()
             if proceed != 'y':
                 print("Operation cancelled.")

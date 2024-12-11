@@ -92,7 +92,7 @@ def main():
             return
 
         if choice == 4:
-            source_unpack_path = input("Enter the path to the Source Unpack folder: ").strip()
+            source_unpack_path = input("Enter the path to the Source Unpack folder(not on unpack/portal): ").strip()
             apply_minimal_voice_lines_preset(source_unpack_path)
             return
 
@@ -110,9 +110,10 @@ def main():
         apply_preset = input("Do you want to apply the Minimal Voice Lines preset? (y/n): ").strip().lower()
         if apply_preset == 'y':
             apply_minimal_voice_lines_preset(source_unpack_path)
-            os.remove(zip_download_path)
-            shutil.rmtree(extracted_folder)
-            print("Process completed successfully!")
+
+        os.remove(zip_download_path) 
+        shutil.rmtree(extracted_folder)
+        print("Process completed successfully!")
 
     except ValueError:
         print("Invalid input. Please use numbers to select options.")

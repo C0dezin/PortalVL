@@ -111,6 +111,7 @@ def apply_minimal_voice_lines_preset(source_unpack_path):
         "ding_off.wav",
         "ding_on.wav",
         "escape_02_spheredestroy2-00.wav",
+        "escape_02_ spheredestroy2-00.wav",
         "escape_02_ballhitpain-02.wav",
         "escape_02_entry-04.wav",
         "escape_02_miscbabble-10.wav",
@@ -171,10 +172,9 @@ def main():
         apply_preset = input("Do you want to apply the Minimal Voice Lines preset? (y/n): ").strip().lower()
         skip = False
 
-        if language == "russian" or language == "spanish" and apply_preset == 'y':
+        if language == "russian" and apply_preset == 'y':
             proceed = input("WARNING: WILL BREAK, DO YOU WANT TO PROCEED? (y/n): ").strip().lower()
             if proceed != 'y':
-                print("Operation cancelled.")
                 skip = True
 
         if apply_preset == 'y' and not skip:

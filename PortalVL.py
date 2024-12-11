@@ -147,12 +147,12 @@ def main():
             print("Invalid option. Please try again.")
             return
 
-        language = language_map[choice]
-
         if choice == 6:
             source_unpack_path = input("Enter the path to the Source Unpack folder (before /portal folder): ").strip()
             apply_minimal_voice_lines_preset(source_unpack_path)
             return
+
+        language = language_map[choice]
 
         zip_url = f"https://0x0.c0de.wtf/portalVL/{language}.zip"
         zip_download_path = f"{language}.zip"
@@ -188,6 +188,7 @@ def main():
         print("Invalid input. Please use numbers to select options.")
     except Exception as e:
         print(f"An error occurred: {e}")
+
 
 if __name__ == "__main__":
     main()

@@ -77,29 +77,30 @@ def main():
     print("1. German")
     print("2. English")
     print("3. French")
-    print("4. Minimal Voice Lines Preset")
-    print("5. Exit")
+    print("4. Russian")
+    print("5. Minimal Voice Lines Preset")
+    print("6. Exit")
 
     try:
-        choice = int(input("Choose an option (1-5): ").strip())
-        if choice == 5:
+        choice = int(input("Choose an option (1-6): ").strip())
+        if choice == 6:
             print("Exiting the program.")
             return
 
-        language_map = {1: "german", 2: "english", 3: "french"}
-        if choice not in language_map and choice != 4:
+        language_map = {1: "german", 2: "english", 3: "french", 4: "russian"}
+        if choice not in language_map and choice != 5:
             print("Invalid option. Please try again.")
             return
 
-        if choice == 4:
-            source_unpack_path = input("Enter the path to the Source Unpack folder(not on unpack/portal): ").strip()
+        if choice == 5:
+            source_unpack_path = input("Enter the path to the Source Unpack folder (not on unpack/portal): ").strip()
             apply_minimal_voice_lines_preset(source_unpack_path)
             return
 
         language = language_map[choice]
         zip_url = f"https://0x0.c0de.wtf/portalVL/{language}.zip"
         zip_download_path = f"{language}.zip"
-        source_unpack_path = input("Enter the path to the Source Unpack folder(not on unpack/portal): ").strip()
+        source_unpack_path = input("Enter the path to the Source Unpack folder (not on unpack/portal): ").strip()
         extracted_folder = f"extracted_{language}"
 
         download_zip(zip_url, zip_download_path)

@@ -14,31 +14,85 @@ def download_zip(url, output_path):
         print(f"Error downloading file: {response.status_code}")
         raise Exception("Download failed")
 
-def extract_zip(zip_path, target_path):
+def extract_zip(zip_path, target_path, language):
     print("Extracting files from ZIP...")
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         for member in zip_ref.namelist():
-            target_file_path = os.path.join(target_path, os.path.basename(member))
-            if not member.endswith('/'):
+            if 'scenes' in member:
+                target_file_path = os.path.join(target_path, language, 'scenes', member.replace(f'{language}/scenes/', ''))
+            elif 'scripts' in member:
+                target_file_path = os.path.join(target_path, language, 'scripts', member.replace(f'{language}/scripts/', ''))
+            elif 'sounds' in member:
+                target_file_path = os.path.join(target_path, language, 'sound', member.replace(f'{language}/sounds/', ''))
+            else:
+                target_file_path = os.path.join(target_path, member)
+
+            if member.endswith('/'):
+                os.makedirs(target_file_path, exist_ok=True)
+            else:
                 os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
                 with zip_ref.open(member) as source, open(target_file_path, 'wb') as target:
                     shutil.copyfileobj(source, target)
     print("Extraction completed!")
 
-def replace_vo_in_source_unpack(source_unpack_path, extracted_vo_folder):
-    print("Replacing voice lines in Source Unpack...")
-    target_path = os.path.join(source_unpack_path, "portal/sound/vo/aperture_ai")
-    if not os.path.exists(target_path):
-        raise FileNotFoundError(f"Target folder not found: {target_path}")
+def apply_files_to_source_unpack(source_unpack_path, extracted_folder, language, folder_name):
+    print(f"Applying {folder_name} files to Source Unpack...")
+    if folder_name == "scenes":
+        target_folder = os.path.join(source_unpack_path, "portal", "scenes")
+    elif folder_name == "scripts":
+        target_folder = os.path.join(source_unpack_path, "portal", "scripts")
+    else:
+        target_folder = os.path.join(source_unpack_path, folder_name)
 
-    for file in os.listdir(extracted_vo_folder):
-        source_file = os.path.join(extracted_vo_folder, file)
-        target_file = os.path.join(target_path, file)
-        
-        os.makedirs(os.path.dirname(target_file), exist_ok=True)
-        shutil.copy2(source_file, target_file)
-        print(f"Replaced: {file}")
-    print("Replacement completed!")
+    if not os.path.exists(target_folder):
+        os.makedirs(target_folder, exist_ok=True)
+
+    source_folder = os.path.join(extracted_folder, language, folder_name)
+    for dirpath, dirnames, filenames in os.walk(source_folder):
+        relative_dir = os.path.relpath(dirpath, source_folder)
+        target_dir = os.path.join(target_folder, relative_dir)
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir, exist_ok=True)
+
+        for file in filenames:
+            source_file = os.path.join(dirpath, file)
+            target_file = os.path.join(target_dir, file)
+            try:
+                shutil.copy2(source_file, target_file)
+                print(f"Applied: {file}")
+            except PermissionError:
+                print(f"Permission denied for file: {file}. Skipping it.")
+            except Exception as e:
+                print(f"An error occurred while copying {file}: {e}")
+
+    print(f"{folder_name} files applied successfully!")
+
+def replace_sound_files_in_source_unpack(source_unpack_path, extracted_sound_folder):
+    print("Replacing sound files in Source Unpack...")
+    sound_folders = ['ambient', 'npc', 'vo/aperture_ai', 'vo/escape']
+
+    for folder in sound_folders:
+        source_folder = os.path.join(extracted_sound_folder, folder)
+        if os.path.exists(source_folder):
+            target_folder = os.path.join(source_unpack_path, "portal/sound", folder)
+            if not os.path.exists(target_folder):
+                os.makedirs(target_folder, exist_ok=True)
+            for file in os.listdir(source_folder):
+                source_file = os.path.join(source_folder, file)
+                target_file = os.path.join(target_folder, file)
+                os.makedirs(os.path.dirname(target_file), exist_ok=True)
+
+                try:
+                    shutil.copy2(source_file, target_file)
+                    print(f"Applied: {file} to {folder}")
+                except PermissionError:
+                    print(f"Permission denied for file: {file}. Skipping it.")
+                except Exception as e:
+                    print(f"An error occurred while copying {file}: {e}")
+        else:
+            print(f"Warning: {folder} folder not found in extracted ZIP.")
+    
+    print("Sound file replacement completed!")
 
 def apply_minimal_voice_lines_preset(source_unpack_path):
     print("Applying Minimal Voice Lines preset...")
@@ -78,41 +132,55 @@ def main():
     print("2. English")
     print("3. French")
     print("4. Russian")
-    print("5. Minimal Voice Lines Preset")
-    print("6. Exit")
+    print("5. Spanish")
+    print("6. Minimal Voice Lines Preset")
+    print("7. Exit")
 
     try:
-        choice = int(input("Choose an option (1-6): ").strip())
-        if choice == 6:
+        choice = int(input("Choose an option (1-7): ").strip())
+        if choice == 7:
             print("Exiting the program.")
             return
 
-        language_map = {1: "german", 2: "english", 3: "french", 4: "russian"}
-        if choice not in language_map and choice != 5:
+        language_map = {1: "german", 2: "english", 3: "french", 4: "russian", 5: "spanish"}
+        if choice not in language_map and choice != 6:
             print("Invalid option. Please try again.")
             return
 
-        if choice == 5:
-            source_unpack_path = input("Enter the path to the Source Unpack folder (not on unpack/portal): ").strip()
+        language = language_map[choice]
+
+        if choice == 6:
+            source_unpack_path = input("Enter the path to the Source Unpack folder (before /portal folder): ").strip()
             apply_minimal_voice_lines_preset(source_unpack_path)
             return
 
-        language = language_map[choice]
         zip_url = f"https://0x0.c0de.wtf/portalVL/{language}.zip"
         zip_download_path = f"{language}.zip"
-        source_unpack_path = input("Enter the path to the Source Unpack folder (not on unpack/portal): ").strip()
+        source_unpack_path = input("Enter the path to the Source Unpack folder (before /portal folder): ").strip()
         extracted_folder = f"extracted_{language}"
 
         download_zip(zip_url, zip_download_path)
         os.makedirs(extracted_folder, exist_ok=True)
-        extract_zip(zip_download_path, extracted_folder)
-        replace_vo_in_source_unpack(source_unpack_path, extracted_folder)
+        extract_zip(zip_download_path, extracted_folder, language)
+
+        apply_files_to_source_unpack(source_unpack_path, extracted_folder, language, "scenes")
+        apply_files_to_source_unpack(source_unpack_path, extracted_folder, language, "scripts")
+
+        replace_sound_files_in_source_unpack(source_unpack_path, os.path.join(extracted_folder, language, "sound"))
 
         apply_preset = input("Do you want to apply the Minimal Voice Lines preset? (y/n): ").strip().lower()
-        if apply_preset == 'y':
+        skip = False
+
+        if language == "russian" and apply_preset == 'y':
+            proceed = input("WARNING: WILL BREAK, DO YOU WANT TO PROCEED? (y/n): ").strip().lower()
+            if proceed != 'y':
+                print("Operation cancelled.")
+                skip = True
+
+        if apply_preset == 'y' and not skip:
             apply_minimal_voice_lines_preset(source_unpack_path)
 
-        os.remove(zip_download_path) 
+        os.remove(zip_download_path)
         shutil.rmtree(extracted_folder)
         print("Process completed successfully!")
 
